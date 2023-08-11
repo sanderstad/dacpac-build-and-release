@@ -8,9 +8,10 @@ inputs:
     description: 'Name to the project file'
     required: true
   configuration: # configuration to build
-    description: 'Configuration to build'
+    description: 'Configuration to build. Allowed values are Debug and Release'
     required: false
     default: 'Release'
+
   artifact-name: # name of the artifact
     description: 'Name of the artifact'
     required: false
@@ -22,6 +23,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: 'Get all vars'
+      shell: powershell
+      run: |
+        gci env:* | sort-object name
     - name: 'Check if DACPAC version is set'
       shell: powershell
       run: |
