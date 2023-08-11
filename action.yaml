@@ -6,11 +6,11 @@ inputs:
     required: true
   configuration: # configuration to build
     description: 'Configuration to build'
-    required: true
+    required: false
     default: 'Release'
   artifact-name: # name of the artifact
     description: 'Name of the artifact'
-    required: true
+    required: false
     default: 'Database'
   version: # version of the DACPAC
     description: 'Version of the DACPAC'
