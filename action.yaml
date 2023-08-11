@@ -26,6 +26,7 @@ runs:
     - name: 'Get all vars'
       shell: powershell
       run: |
+        "DACPAC_VERSION=${{ inputs.version }}" >> $env:GITHUB_ENV
         gci env:* | sort-object name
     - name: 'Check if DACPAC version is set'
       shell: powershell
