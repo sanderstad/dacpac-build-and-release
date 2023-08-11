@@ -38,7 +38,7 @@ runs:
         echo "DACPAC_VERSION=$newVersion" >> $GITHUB_ENV
 
         # Set the artifact name
-        {{ inputs.artifact-name }} += "_$newVersion"
+        $inputs.artifact-name += "_$newVersion"
     - name: 'Setup MSBuild'
       uses: microsoft/setup-msbuild@v1
     - name: 'Build'
