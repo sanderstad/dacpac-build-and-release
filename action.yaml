@@ -19,18 +19,17 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - if: ${{ env.DACPAC_VERSION == '' }}
-      name: 'Check if DACPAC version is set'
+    - name: 'Check if DACPAC version is set'
       shell: powershell
       run: |
-        if(${{ env.DACPAC_VERSION }} -eq ''){
+        if($env.DACPAC_VERSION -eq ''){
           echo "DACPAC_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
         }
     - name: 'Set new DACPAC version'
       shell: powershell
       run: |
         # Convert the version to a System.Version object
-        [version]$version = ${{ env.DACPAC_VERSION }}
+        [version]$version = $env.DACPAC_VERSION
 
         # Increment the build number
         $newVersion = ("$($version.Major).$($version.Minor).$($version.Build + 1).$($version.Revision)").ToString()
