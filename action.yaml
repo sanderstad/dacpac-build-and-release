@@ -26,7 +26,7 @@ runs:
       shell: powershell
       run: |
         if($env.DACPAC_VERSION -eq ''){
-          echo "DACPAC_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+          "DACPAC_VERSION=${{ inputs.version }}" >> $env:GITHUB_ENV
         }
     - name: 'Set new DACPAC version'
       shell: powershell
@@ -38,7 +38,7 @@ runs:
         $newVersion = ("$($version.Major).$($version.Minor).$($version.Build + 1).$($version.Revision)").ToString()
 
         # Set the new version in the environment
-        echo "DACPAC_VERSION=$newVersion" >> $GITHUB_ENV
+        "DACPAC_VERSION=$newVersion" >> $env:GITHUB_ENV
     - name: 'Setup MSBuild'
       uses: microsoft/setup-msbuild@v1
     - name: 'Build'
