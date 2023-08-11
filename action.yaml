@@ -1,0 +1,57 @@
+name: 'DACPAC build and release'
+description: 'Build and release a DACPAC to a SQL Server with ease'
+inputs:
+  project-file: # path to the project file
+    description: 'Name to the project file'
+    required: true
+  configuration: # configuration to build
+    description: 'Configuration to build'
+    required: true
+    default: 'Release'
+  artifact-name: # name of the artifact
+    description: 'Name of the artifact'
+    required: true
+    default: 'Database'
+  version: # version of the DACPAC
+    description: 'Version of the DACPAC'
+    required: false
+    default: '1.0.0.0'
+runs:
+  using: "composite"
+  steps:
+    - if: ${{ env.DACPAC_VERSION == '' }}
+      name: 'Check if DACPAC version is set'
+      shell: powershell
+      run: |
+        if(${{ env.DACPAC_VERSION }} -eq ''){
+          echo "DACPAC_VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+        }
+    - name: 'Set new DACPAC version'
+      shell: powershell
+      run: |
+        # Convert the version to a System.Version object
+        [version]$version = ${{ env.DACPAC_VERSION }}
+
+        # Increment the build number
+        $newVersion = ("$($version.Major).$($version.Minor).$($version.Build + 1).$($version.Revision)").ToString()
+
+        # Set the new version in the environment
+        echo "DACPAC_VERSION=$newVersion" >> $GITHUB_ENV
+
+        # Set the artifact name
+        {{ inputs.artifact-name }} += "_$newVersion"
+    - name: 'Setup MSBuild'
+      uses: microsoft/setup-msbuild@v1
+    - name: 'Build'
+      shell: bash
+      run: |
+        msbuild ${{ inputs.project-file }} /p:Configuration=${{ inputs.configuration }} /p:Version=${{ env.DACPAC_VERSION }}
+    - uses: actions/upload-artifact@v3
+      with:
+        name: {{ inputs.artifact-name }}
+        path: |
+          ${{ github.workspace }}/**/{{ inputs.configuration }/*/*.dacpac
+          ${{ github.workspace }}/**/*.publish.xml
+
+
+
