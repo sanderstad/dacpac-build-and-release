@@ -23,17 +23,24 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: 'Get all vars'
+    - name: 'Get the variable'
       shell: powershell
       run: |
-        "DACPAC_VERSION=${{ inputs.version }}" >> $env:GITHUB_ENV
-        gci env:* | sort-object name
-    - name: 'Check if DACPAC version is set'
-      shell: powershell
-      run: |
-        if($env.DACPAC_VERSION -eq ''){
+        $variables = $(.\gh.exe api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Data-Masterminds/PortalDB/actions/variables) | ConvertFrom-JSON
+        if($result.variables.name -contains "DACPAC_VERSION"){
+          # Variable 'DACPAC_VERSION' found
+
+          # Get variable value 
+          $varVersion = $(gh.exe api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Data-Masterminds/PortalDB/actions/variables/DACPAC_VERSION) | ConvertFrom-JSON
+          "DACPAC_VERSION=$($varVersion.value" >> $env:GITHUB_ENV
+        } else{
+          # Variable 'DACPAC_VERSION' found
+          # Setting environment variable
           "DACPAC_VERSION=${{ inputs.version }}" >> $env:GITHUB_ENV
         }
+
+        [version]$version = $varVersion
+        
     - name: 'Set new DACPAC version'
       shell: powershell
       run: |
@@ -45,18 +52,18 @@ runs:
 
         # Set the new version in the environment
         "DACPAC_VERSION=$newVersion" >> $env:GITHUB_ENV
-    - name: 'Setup MSBuild'
-      uses: microsoft/setup-msbuild@v1
-    - name: 'Build'
-      shell: bash
-      run: |
-        msbuild ${{ inputs.project-file }} /p:Configuration=${{ inputs.configuration }} /p:Version=${{ env.DACPAC_VERSION }}
-    - uses: actions/upload-artifact@v3
-      with:
-        name: "${{ inputs.artifact-name }}_${{ env.DACPAC_VERSION }}"
-        path: |
-          ${{ github.workspace }}/**/{{ inputs.configuration }/*/*.dacpac
-          ${{ github.workspace }}/**/*.publish.xml
+    #- name: 'Setup MSBuild'
+    #  uses: microsoft/setup-msbuild@v1
+    #- name: 'Build'
+    #  shell: bash
+    #  run: |
+    #    msbuild ${{ inputs.project-file }} /p:Configuration=${{ inputs.configuration }} /p:Version=${{ env.DACPAC_VERSION }}
+    #- uses: actions/upload-artifact@v3
+    #  with:
+    #    name: "${{ inputs.artifact-name }}_${{ env.DACPAC_VERSION }}"
+    #    path: |
+    #      ${{ github.workspace }}/**/{{ inputs.configuration }/*/*.dacpac
+    #      ${{ github.workspace }}/**/*.publish.xml
 
 
 
