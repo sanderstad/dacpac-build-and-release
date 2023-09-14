@@ -19,4 +19,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - id: test
-        uses:  sanderstad/dacpac-build-and-release@v0.0.13
+        uses:  sanderstad/dacpac-build-and-release@v0.0.14
