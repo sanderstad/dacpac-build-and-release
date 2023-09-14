@@ -26,12 +26,12 @@ runs:
     - name: 'Get the variable'
       shell: powershell
       run: |
-        $variables = $(.\gh.exe api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Data-Masterminds/PortalDB/actions/variables) | ConvertFrom-JSON
+        $variables = $(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Data-Masterminds/PortalDB/actions/variables) | ConvertFrom-JSON
         if($result.variables.name -contains "DACPAC_VERSION"){
           # Variable 'DACPAC_VERSION' found
 
           # Get variable value
-          $varVersion = $(gh.exe api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Data-Masterminds/PortalDB/actions/variables/DACPAC_VERSION) | ConvertFrom-JSON
+          $varVersion = $(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Data-Masterminds/PortalDB/actions/variables/DACPAC_VERSION) | ConvertFrom-JSON
           "DACPAC_VERSION=$($varVersion.value)" >> $env:GITHUB_ENV
         } else{
           # Variable 'DACPAC_VERSION' found
