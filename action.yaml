@@ -4,29 +4,31 @@ branding:
   icon: 'database'
 description: 'Build and release a DACPAC to a SQL Server with ease'
 inputs:
-  project-file: # path to the project file
-    description: 'Name to the project file'
-    required: true
-  configuration: # configuration to build
-    description: 'Configuration to build. Allowed values are Debug and Release'
-    required: false
-    default: 'Release'
-
   artifact-name: # name of the artifact
     description: 'Name of the artifact'
     required: false
     default: 'Database'
+  configuration: # configuration to build
+    description: 'Configuration to build. Allowed values are Debug and Release'
+    required: false
+    default: 'Release'
+  project-file: # path to the project file
+    description: 'Name to the project file'
+    required: true
+  token: # GitHub token
+    description: 'GitHub token'
+    required: true
   version: # version of the DACPAC
     description: 'Version of the DACPAC'
     required: false
     default: '1.0.0.0'
 runs:
   using: "composite"
-  env:
-    GH_TOKEN: ${{ github.token }}
   steps:
     - name: 'Get the variable'
       shell: powershell
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
       run: |
         $variables = $(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Data-Masterminds/PortalDB/actions/variables) | ConvertFrom-JSON
         if($result.variables.name -contains "DACPAC_VERSION"){
