@@ -52,18 +52,18 @@ runs:
 
         # Set the new version in the environment
         "DACPAC_VERSION=$newVersion" >> $env:GITHUB_ENV
-    #- name: 'Setup MSBuild'
-    #  uses: microsoft/setup-msbuild@v1
-    #- name: 'Build'
-    #  shell: bash
-    #  run: |
-    #    msbuild ${{ inputs.project-file }} /p:Configuration=${{ inputs.configuration }} /p:Version=${{ env.DACPAC_VERSION }}
-    #- uses: actions/upload-artifact@v3
-    #  with:
-    #    name: "${{ inputs.artifact-name }}_${{ env.DACPAC_VERSION }}"
-    #    path: |
-    #      ${{ github.workspace }}/**/{{ inputs.configuration }/*/*.dacpac
-    #      ${{ github.workspace }}/**/*.publish.xml
+    - name: 'Setup MSBuild'
+      uses: microsoft/setup-msbuild@v1
+    - name: 'Build'
+      shell: bash
+      run: |
+        msbuild ${{ inputs.project-file }} /p:Configuration=${{ inputs.configuration }} /p:Version=${{ env.DACPAC_VERSION }}
+    - uses: actions/upload-artifact@v3
+      with:
+        name: "${{ inputs.artifact-name }}_${{ env.DACPAC_VERSION }}"
+        path: |
+          ${{ github.workspace }}/**/{{ inputs.configuration }/*/*.dacpac
+          ${{ github.workspace }}/**/*.publish.xml
 
 
 
