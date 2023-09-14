@@ -1,0 +1,69 @@
+name: 'DACPAC build and release'
+branding:
+  color: 'blue'
+  icon: 'database'
+description: 'Build and release a DACPAC to a SQL Server with ease'
+inputs:
+  project-file: # path to the project file
+    description: 'Name to the project file'
+    required: true
+  configuration: # configuration to build
+    description: 'Configuration to build. Allowed values are Debug and Release'
+    required: false
+    default: 'Release'
+
+  artifact-name: # name of the artifact
+    description: 'Name of the artifact'
+    required: false
+    default: 'Database'
+  version: # version of the DACPAC
+    description: 'Version of the DACPAC'
+    required: false
+    default: '1.0.0.0'
+runs:
+  using: "composite"
+  steps:
+    - name: 'Get the variable'
+      shell: powershell
+      run: |
+        $variables = $(.\gh.exe api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Data-Masterminds/PortalDB/actions/variables) | ConvertFrom-JSON
+        if($result.variables.name -contains "DACPAC_VERSION"){
+          # Variable 'DACPAC_VERSION' found
+
+          # Get variable value 
+          $varVersion = $(gh.exe api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/Data-Masterminds/PortalDB/actions/variables/DACPAC_VERSION) | ConvertFrom-JSON
+          "DACPAC_VERSION=$($varVersion.value" >> $env:GITHUB_ENV
+        } else{
+          # Variable 'DACPAC_VERSION' found
+          # Setting environment variable
+          "DACPAC_VERSION=${{ inputs.version }}" >> $env:GITHUB_ENV
+        }
+
+        [version]$version = $varVersion
+        
+    - name: 'Set new DACPAC version'
+      shell: powershell
+      run: |
+        # Convert the version to a System.Version object
+        [version]$version = $env.DACPAC_VERSION
+
+        # Increment the build number
+        $newVersion = ("$($version.Major).$($version.Minor).$($version.Build + 1).$($version.Revision)").ToString()
+
+        # Set the new version in the environment
+        "DACPAC_VERSION=$newVersion" >> $env:GITHUB_ENV
+    - name: 'Setup MSBuild'
+      uses: microsoft/setup-msbuild@v1
+    - name: 'Build'
+      shell: bash
+      run: |
+        msbuild ${{ inputs.project-file }} /p:Configuration=${{ inputs.configuration }} /p:Version=${{ env.DACPAC_VERSION }}
+    - uses: actions/upload-artifact@v3
+      with:
+        name: "${{ inputs.artifact-name }}_${{ env.DACPAC_VERSION }}"
+        path: |
+          ${{ github.workspace }}/**/{{ inputs.configuration }/*/*.dacpac
+          ${{ github.workspace }}/**/*.publish.xml
+
+
+
