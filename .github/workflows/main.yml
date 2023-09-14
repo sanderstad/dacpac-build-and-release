@@ -20,3 +20,6 @@ jobs:
       - uses: actions/checkout@v3
       - id: test
         uses:  sanderstad/dacpac-build-and-release@v0.0.14
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          project-file: 'Test/Test.sqlproj'
